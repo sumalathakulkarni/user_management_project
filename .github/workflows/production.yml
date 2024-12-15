@@ -83,4 +83,3 @@ jobs:
           exit-code: '1' # Fail the job if vulnerabilities are found
           ignore-unfixed: true
           severity: 'CRITICAL,HIGH'
-          trivyignores: '.trivyignore'
