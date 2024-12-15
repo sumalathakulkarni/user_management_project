@@ -8,10 +8,10 @@ import logging
 
 class SMTPClient:
     def __init__(self, server: str, port: int, username: str, password: str):
-        self.server = server
-        self.port = port
-        self.username = username
-        self.password = password
+        self.server = settings.smtp_server
+        self.port = settings.smtp_port
+        self.username = settings.smtp_username
+        self.password = settings.smtp_password
 
     def send_email(self, subject: str, html_content: str, recipient: str):
         try:
