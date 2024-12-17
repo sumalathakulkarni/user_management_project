@@ -41,4 +41,6 @@ class Event(Base):
     created_at: Mapped[datetime] = Column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
-    
+    def __repr__(self) -> str:
+        """Provides a readable representation of a event object."""
+        return f"<Event {self.title}, By: {self.createdby}>"
