@@ -39,7 +39,7 @@ async def get_event(event_id: UUID, request: Request, db: AsyncSession = Depends
     )
 
 
-@router.post("/events/", response_model=EventCreate, tags=["Event Management (Requires Admin or Manager Roles)"])
+@router.post("/events/", response_model=EventResponse, tags=["Event Management (Requires Admin or Manager Roles)"])
 async def create(event_data: EventCreate, request: Request, db: AsyncSession = Depends(get_db), email_service: EmailService = Depends(get_email_service), token: str = Depends(oauth2_scheme), current_user: dict = Depends(require_role(["ADMIN", "MANAGER"]))):
 
     event = await EventService.create(db, event_data.model_dump(), email_service)
