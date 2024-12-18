@@ -8,7 +8,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.dependencies import get_email_service, get_settings
 from app.models.event_model import Event
-from app.schemas.event_schemas import EventCreate, EventUpdate
+from app.schemas.event_schemas import EventCreate, EventUpdate, EventResponse
 from uuid import UUID
 from app.services.email_service import EmailService
 import logging
@@ -53,19 +53,27 @@ class EventService:
         return count
 
     @classmethod
-    async def create(cls, session: AsyncSession, event_data: Dict[str, str], email_service: EmailService) -> Optional[EventCreate]:
+    async def create(cls, session: AsyncSession, event_data: Dict[str, str], email_service: EmailService) -> Optional[EventResponse]:
         try:
             validated_data = EventCreate(**event_data).model_dump()
             new_event = Event(**validated_data)
             session.add(new_event)
             await session.commit()
-            return new_event
+    
+            return EventResponse(
+                id=new_event.id,
+                title=new_event.title,
+                createdby=new_event.createdby,
+                startdate=new_event.startdate,
+                enddate=new_event.enddate
+            )
+    
         except ValidationError as e:
             logger.error(f"Validation error during event creation: {e}")
             return None
     
     @classmethod
-    async def update(cls, session: AsyncSession, event_id: UUID, update_data: Dict[str, str]) -> Optional[EventCreate]:
+    async def update(cls, session: AsyncSession, event_id: UUID, update_data: Dict[str, str]) -> Optional[EventResponse]:
         try:
             validated_data = EventUpdate(**update_data).model_dump()
             query = update(Event).where(Event.id == event_id).values(**validated_data).execution_options(synchronize_session="fetch")
@@ -74,7 +82,13 @@ class EventService:
             if updated_event:
                 session.refresh(updated_event)  # Explicitly refresh the updated ueventser object
                 logger.info(f"Event {event_id} updated successfully.")
-                return updated_event
+                return EventResponse(
+                    id=updated_event.id,
+                    title=updated_event.title,
+                    createdby=updated_event.createdby,
+                    startdate=updated_event.startdate,
+                    enddate=updated_event.enddate
+                )
             else:
                 logger.error(f"Event {event_id} not found after update attempt.")
             return None
